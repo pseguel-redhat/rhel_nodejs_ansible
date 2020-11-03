@@ -8,6 +8,7 @@
   tasks:
     - name: Create EC2 key pair based on local file
       ec2_key: 
+        region: "{{ ec2_region }}"
         name: "{{ ec2_name_prefix }}-key"
         key_material: "{{ lookup('file', 'keys/aws_pair.pub') }}"
       register: create_key
