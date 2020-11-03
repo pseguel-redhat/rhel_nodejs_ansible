@@ -1,0 +1,115 @@
+---
+- name: Create AWS host RHEL 
+  hosts: localhost
+
+  vars_files:
+    - vars/vpc_rules.yml
+
+  tasks:
+    - name: Create EC2 key pair based on local file
+      ec2_key: 
+        name: "{{ ec2_name_prefix }}-key"
+        key_material: "{{ lookup('file', 'keys/aws_pair.pub') }}"
+      register: create_key
+
+    - name: Create AWS VPC {{ ec2_name_prefix }}-vpc
+      ec2_vpc_net:
+        name: "{{ ec2_name_prefix }}-vpc"
+        cidr_block:
+          - "{{ec2_subnet}}"
+        region: "{{ ec2_region }}"
+        tags:
+          Info: "Provisionado por Ansible"
+          Workshop: "{{ ec2_name_prefix }}"
+      register: create_vpc
+      until: create_vpc is not failed
+      retries: 5
+
+    - name: Create EC2 security group for VPC named {{ ec2_name_prefix }}-vpc
+      ec2_group:
+        name: "{{ ec2_name_prefix }}-sg"
+        description: all ports open
+        region: "{{ ec2_region }}"
+        vpc_id: "{{create_vpc.vpc.id}}"
+        tags:
+          Info: "Provisionado por Ansible"
+          Workshop: "{{ ec2_name_prefix }}"
+        rules: "{{ common.ports }}"
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+      register: create_sg
+      until: create_sg is not failed
+      retries: 5
+
+    - name: Create public subnet for {{ ec2_name_prefix }}-vpc
+      ec2_vpc_subnet:
+        region: "{{ ec2_region }}"
+        #az: "{{ ec2_az }}"
+        vpc_id: "{{ create_vpc.vpc.id }}"
+        cidr: "{{ ec2_subnet }}"
+        wait_timeout: 600
+        resource_tags:
+          Info: "Provisionado por Ansible"
+          Workshop: "{{ ec2_name_prefix }}"
+          Name: "{{ ec2_name_prefix }}-subnet"
+      register: create_subnet
+      when: ec2_vpc_id is undefined
+      until: create_subnet is not failed
+      retries: 15
+
+    - name: vpc internet gateway is present for {{ create_vpc.vpc.id }}
+      ec2_vpc_igw:
+        region: "{{ ec2_region }}"
+        vpc_id: "{{ create_vpc.vpc.id }}"
+        tags:
+          Info: "Provisionado por Ansible"
+          Workshop: "{{ ec2_name_prefix }}"
+      register: igw
+      until: igw is not failed
+      retries: 15
+      when: ec2_vpc_id is undefined
+
+    - name: vpc public subnet route table is present for {{ create_vpc.vpc.id }}
+      ec2_vpc_route_table:
+        region: "{{ ec2_region }}"
+        vpc_id: "{{ create_vpc.vpc.id }}"
+        subnets:
+          - "{{ create_subnet.subnet.id }}"
+        routes:
+          - dest: 0.0.0.0/0
+            gateway_id: "{{ igw.gateway_id }}"
+        tags:
+          Info: "Provisionado por Ansible"
+          Workshop: "{{ ec2_name_prefix }}"
+      register: routetable
+      until: routetable is not failed
+      retries: 5
+      when: ec2_vpc_id is undefined
+
+    - name: set variables for instance creation dynamically since VPC was not supplied by user
+      set_fact:
+        ec2_vpc_id: "{{ create_vpc.vpc.id }}"
+        ec2_security_group: "{{ ec2_name_prefix }}-sg"
+        ec2_vpc_subnet_id: "{{ create_subnet.subnet.id }}"
+
+    - name: Provision instance
+      ec2:
+        key_name: "{{ ec2_name_prefix }}-key"
+        assign_public_ip: true
+        group: "{{ ec2_security_group }}"
+        region: "{{ ec2_region }}" 
+        instance_type: t2.micro
+        #centos 8.2 image
+        image: ami-01ca03df4a6012157
+        instance_tags:
+          Info: "Provisionado por Ansible"
+          Workshop: "{{ ec2_name_prefix }}"
+          Name: "{{ ec2_name_prefix }}-node"
+        vpc_subnet_id: "{{ ec2_vpc_subnet_id }}"
+        volumes:
+        - device_name: /dev/sda1
+          volume_type: gp2
+          volume_size: 10 
+          delete_on_termination: true
+      register: node_output

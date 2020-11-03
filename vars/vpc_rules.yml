@@ -1,0 +1,24 @@
+---
+common:
+  ports:
+    - proto: 47
+      to_port: -1
+      from_port: -1
+      cidr_ip: 0.0.0.0/0
+    - proto: tcp
+      to_port: 443
+      from_port: 443
+      cidr_ip: 0.0.0.0/0
+    - proto: icmp
+      to_port: -1
+      from_port: -1
+      cidr_ip: 0.0.0.0/0
+    - proto: tcp
+      to_port: 80
+      from_port: 80
+      cidr_ip: 0.0.0.0/0
+    - proto: tcp
+      to_port: 22
+      from_port: 22
+      cidr_ip: 0.0.0.0/0
+
