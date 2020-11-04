@@ -125,6 +125,7 @@
 
     - name: Wait for SSH to come up
       delegate_to: "{{ item.public_dns_name }}"
+      remote_user: centos
       wait_for_connection:
         delay: 60
         timeout: 320
