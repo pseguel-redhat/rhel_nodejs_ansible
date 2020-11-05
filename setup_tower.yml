@@ -6,9 +6,9 @@
     - vars/secret.yml
 
   tasks:
-  - name: Debug
-    debug:
-      var: credentials
+  - name: Create SSH keys
+    community.crypto.openssh_keypair:
+      path: "{{ priv_key_filename }}"
 
   - name: Add Credentials
     tower_credential:
@@ -21,6 +21,25 @@
       password: "{{ item.password | default(omit) }}"
       state: present
     loop: "{{ credentials }}"
+
+  - name: Create Inventory for cloud hosts
+    tower_inventory:
+      name: "{{ inventory.name }}"
+      description: "{{ inventory.description }}"
+      organization: "{{ inventory.organization }}"
+      state: present
+
+  - name: Create Inventory Source for cloud hosts
+    tower_inventory_source:
+      name: "{{ inventory.name }}-source"
+      description: "{{ inventory.description }} source"
+      inventory: "{{ inventory.name }}"
+      source: "{{ inventory.source }}"
+      source_regions: "{{ inventory.region }}"
+      credential: "{{ creds_cloud_name }}"
+      overwrite: true
+      update_on_launch: True
+      state: present
 
   - name: Add Tower Projects
     tower_project:
@@ -40,12 +59,53 @@
       inventory: "{{ item.inventory }}"
       project: "{{ item.project }}"
       playbook: "{{ item.playbook }}"
-      credential: "{{ item.credentials }}"
+      credentials: "{{ item.credentials }}"
       state: present
     loop: "{{ playbooks }}"
 
   - name: Add Workflow Job Templates
     awx.awx.tower_workflow_job_template:
-      name: "DEMO - Workflow"
+      name: "{{ workflow_name }}"
       description: "Demo of Workflow Job Template"
       organization: "{{ organization }}"
+  
+  - name: Create nodes
+    awx.awx.tower_workflow_job_template_node:
+      identifier: "{{ item.workflow_identifier }}"
+      workflow: "{{ workflow_name }}"
+      unified_job_template: "{{ item.name }}"
+      organization: "{{ organization }}"
+    loop: "{{ playbooks }}"
+    
+  - name: Create Inventory Sync Node
+    awx.awx.tower_workflow_job_template_node:
+      identifier: Inventory sync
+      workflow: "{{ workflow_name }}"
+      unified_job_template: "{{ inventory.name }}-source"
+      organization: "{{ organization }}"
+
+  # Node assocation phase
+  - name: Associate nodes first, sync
+    awx.awx.tower_workflow_job_template_node:
+      identifier: first
+      workflow: "{{ workflow_name }}"
+      organization: "{{ organization }}"
+      success_nodes: 
+        - Inventory sync
+
+  - name: Associate nodes sync, middle
+    awx.awx.tower_workflow_job_template_node:
+      identifier: Inventory sync
+      workflow: "{{ workflow_name }}"
+      organization: "{{ organization }}"
+      success_nodes: 
+        - middle
+
+  - name: Associate nodes middle, end
+    awx.awx.tower_workflow_job_template_node:
+      identifier: middle
+      workflow: "{{ workflow_name }}"
+      organization: "{{ organization }}"
+      success_nodes: 
+        - end
+
