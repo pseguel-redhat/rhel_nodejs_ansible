@@ -1,0 +1,65 @@
+---
+cliente: FINAL
+organization: Default
+priv_key_filename: keys/aws_pair
+creds_hosts_name: "[ {{ cliente }} ] AWS Linux creds"
+creds_cloud_name: "[ {{ cliente }} ] AWS creds"
+workflow_name: "[ {{ cliente }} ] Workflow"
+cloud_inventory: "[ {{ cliente }} ] AWS Inventory"
+
+inventory:
+  name: "{{ cloud_inventory }}"
+  description: "{{ cloud_inventory }}"
+  organization: "{{ organization }}"
+  source: ec2
+  region: us-east-1
+
+credentials:
+  - name: "{{ creds_hosts_name }}" 
+    description: "Credentials for cloud based hosts"
+    organization: "{{ organization }}"
+    kind: ssh
+    username: centos
+    ssh_key_data: "{{ lookup('file', priv_key_filename) }}"
+  - name: "{{ creds_cloud_name }}" 
+    description: "Credentials for Cloud Provider"
+    organization: "{{ organization }}"
+    kind: aws 
+    username: "{{ aws_key }}"
+    password: "{{ aws_secret }}" 
+
+projects:
+  - name: "[ {{ cliente }} ] Proyecto AWS"
+    description: "Proyecto con playbooks para demo de {{ cliente }}"
+    scm_url: https://github.com/pseguel-redhat/rhel_nodejs_ansible
+  - name: "[ {{ cliente }} ] Proyecto Operaciones" 
+    description: "Proyecto con playbooks para demo de {{ cliente }}"
+    scm_url: https://github.com/pseguel-redhat/workshop-examples 
+    scm_branch: webops
+  - name: "[ {{ cliente }} ] Proyecto Developers"
+    description: "Proyecto con playbooks para demo de {{ cliente }}"
+    scm_url: https://github.com/pseguel-redhat/workshop-examples 
+    scm_branch: webdev
+
+playbooks:
+  - name: "[ {{ cliente }} ] Deploy Linux Host"
+    workflow_identifier: first
+    inventory: Workshop Inventory
+    project: "[ {{ cliente }} ] Proyecto AWS"
+    playbook: provision_rhel.yml
+    credentials: 
+      - "{{ creds_hosts_name }}"
+      - "{{ creds_cloud_name }}" 
+  - name: "[ {{ cliente }} ] Web App Deploy"
+    inventory: "{{ cloud_inventory }}"
+    workflow_identifier: middle
+    project: "[ {{ cliente }} ] Proyecto Operaciones"
+    playbook: rhel/webops/web_infrastructure.yml
+    credentials: "{{ creds_cloud_name }}"
+  - name: "[ {{ cliente }} ] Node.js Deploy" 
+    workflow_identifier: end
+    inventory: "{{ cloud_inventory }}"
+    project: "[ {{ cliente }} ] Proyecto Developers"
+    playbook: rhel/webdev/install_node_app.yml 
+    credentials: "{{ creds_cloud_name }}"
+
