@@ -58,6 +58,7 @@
       Info: "Provisionado por Ansible"
       Workshop: "{{ ec2_name_prefix }}"
       Name: "{{ ec2_name_prefix }}-lb"
+      role: lb
     vpc_subnet_id: "{{ ec2_vpc_subnet_id }}"
     volumes:
     - device_name: /dev/sda1
