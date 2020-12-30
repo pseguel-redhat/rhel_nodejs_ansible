@@ -1,4 +1,5 @@
 ---
+dns_zone: rhscldemos.net
 ec2_name_prefix: WOMDEMO
 ec2_region: us-east-1
 ec2_wait: true
