@@ -16,9 +16,10 @@
       description: "Credentials for cloud based hosts"
       kind: "{{ item.kind }}" 
       organization: "{{ item.organization }}"
-      username: "{{ item.username | default(omit) }}"
-      ssh_key_data: "{{ item.ssh_key_data | default(omit) }}"
-      password: "{{ item.password | default(omit) }}"
+      inputs:
+        username: "{{ item.username | default(omit) }}"
+        ssh_key_data: "{{ item.ssh_key_data | default(omit) }}"
+        password: "{{ item.password | default(omit) }}"
       state: present
     loop: "{{ credentials }}"
 
@@ -108,4 +109,3 @@
       organization: "{{ organization }}"
       success_nodes: 
         - end
-

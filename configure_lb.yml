@@ -1,0 +1,7 @@
+---
+- name: Configure HA Proxy
+  hosts: all
+  become: yes
+  
+  roles:
+  - lb

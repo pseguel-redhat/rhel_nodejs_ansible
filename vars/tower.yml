@@ -62,4 +62,3 @@ playbooks:
     project: "[ {{ cliente }} ] Proyecto Developers"
     playbook: rhel/webdev/install_node_app.yml 
     credentials: "{{ creds_cloud_name }}"
-
