@@ -1,0 +1,7 @@
+---
+- name: Provision Common AWS Resources (VPC, Subnet, SG, Internet GW, route table)
+  include_tasks: resources/resources.yml
+
+# Instance creation
+- name: provision environment instances
+  include_tasks: 'instances/instances.yml'

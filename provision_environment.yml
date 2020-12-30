@@ -1,0 +1,11 @@
+---
+- name: Create HA Proxy + 2 Webservers
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_files:
+    - vars/vpc_rules.yml
+
+  roles:
+    - manage_ec2_instances
