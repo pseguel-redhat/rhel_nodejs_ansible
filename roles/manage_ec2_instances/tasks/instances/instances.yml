@@ -71,11 +71,11 @@
 - name: Group DNS info from instances
   set_fact:
     dns_records:
-    - dns_name: "lb.{{ dns_zone }}"
+    - dns_name: "lb-{{ ec2_name_prefix }}.{{ dns_zone }}"
       public_ip: "{{ lb_node_output.instances[0].public_ip }}"
-    - dns_name: "web1.{{ dns_zone }}"
+    - dns_name: "web1-{{ ec2_name_prefix }}.{{ dns_zone }}"
       public_ip: "{{ node1_output.instances[0].public_ip }}"
-    - dns_name: "web2.{{ dns_zone }}"
+    - dns_name: "web2-{{ ec2_name_prefix }}.{{ dns_zone }}"
       public_ip: "{{ node2_output.instances[0].public_ip }}"
 
 - name: Create DNS Records
