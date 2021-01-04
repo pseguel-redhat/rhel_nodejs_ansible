@@ -116,3 +116,17 @@
         wait: true
       register: node_output
 
+    - name: Add new instance to host group
+      add_host:
+        hostname: "{{ item.public_ip }}"
+        groupname: launched
+        ansible_user: centos
+      loop: "{{ node_output.instances }}"
+
+    - name: Wait for SSH to come up
+      delegate_to: "{{ item.public_ip }}"
+      remote_user: centos
+      wait_for_connection:
+        delay: 60
+        timeout: 320
+      loop: "{{ node_output.instances }}"
