@@ -66,6 +66,41 @@
       volume_size: 10 
       delete_on_termination: true
     wait: true
-  register: node_output
+  register: lb_node_output
 
+- name: Group DNS info from instances
+  set_fact:
+    dns_records:
+    - dns_name: "lb.{{ dns_zone }}"
+      public_ip: "{{ lb_node_output.instances[0].public_ip }}"
+    - dns_name: "web1.{{ dns_zone }}"
+      public_ip: "{{ node1_output.instances[0].public_ip }}"
+    - dns_name: "web2.{{ dns_zone }}"
+      public_ip: "{{ node2_output.instances[0].public_ip }}"
 
+- name: Create DNS Records
+  route53:
+    state: present
+    zone: "{{ dns_zone }}"
+    record: "{{ item.dns_name }}"
+    type: A
+    ttl: 60
+    value: "{{ item.public_ip }}"
+    overwrite: yes
+    wait: yes
+  loop: "{{ dns_records }}"
+
+- name: Add new instances to host group
+  add_host:
+    hostname: "{{ item.public_ip }}"
+    groupname: launched
+    ansible_user: centos
+  loop: "{{ dns_records }}"
+
+- name: Wait for SSH to come up 
+  delegate_to: "{{ item.public_ip }}"
+  remote_user: centos
+  wait_for_connection:
+    delay: 60
+    timeout: 320
+  loop: "{{ dns_records }}"
