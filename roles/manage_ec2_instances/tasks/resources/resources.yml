@@ -79,3 +79,10 @@
     ec2_vpc_id: "{{ create_vpc.vpc.id }}"
     ec2_security_group: "{{ ec2_name_prefix }}-sg"
     ec2_vpc_subnet_id: "{{ create_subnet.subnet.id }}"
+
+- name: create ssh key pair for EC2 instances
+  ec2_key:
+    region: "{{ ec2_region }}"
+    name: "{{ ec2_name_prefix }}-key"
+    key_material: "{{ lookup('file', 'keys/aws_pair.pub') }}"
+  register: create_key
