@@ -75,6 +75,6 @@ backend simple_page
     balance roundrobin
     option forwardfor
     http-send-name-header Host
-    {% for item in groups.tag_role_webserver %}
+    {% for item in groups.webserver %}
     server  {{ item }} {{ item }}:80 check
     {% endfor %}
