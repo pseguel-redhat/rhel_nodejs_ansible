@@ -72,7 +72,9 @@
       credential: "{{ creds_cloud_name }}"
       overwrite: true
       update_on_launch: True
+      source_vars: "{{ inventory.source_vars }}"
       state: present
+    tags: inventory_source
 
   - name: Add Tower Projects
     awx.awx.tower_project:
