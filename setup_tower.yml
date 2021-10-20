@@ -3,7 +3,6 @@
 
   vars_files:
     - vars/tower.yml
-    - vars/secret.yml
 
   tasks:
   - name: Create organization
@@ -54,6 +53,7 @@
         password: "{{ item.password | default(omit) }}"
       state: present
     loop: "{{ credentials }}"
+    tags: credentials
 
   - name: Create Inventory for cloud hosts
     awx.awx.tower_inventory:
