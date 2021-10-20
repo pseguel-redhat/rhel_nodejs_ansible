@@ -1,10 +1,12 @@
 ---
-cliente: FINAL
-organization: Default
+cliente: DEMO
+organization: Cloud
+organization_desc: "Org para el equipo Cloud"
 priv_key_filename: keys/aws_pair
 creds_hosts_name: "[ {{ cliente }} ] AWS Linux creds"
 creds_cloud_name: "[ {{ cliente }} ] AWS creds"
-workflow_name: "[ {{ cliente }} ] Workflow"
+workflow_name_basico: "[ {{ cliente }} ] Workflow"
+workflow_name_avanzado: "[ {{ cliente }} ] Workflow Avanzado"
 cloud_inventory: "[ {{ cliente }} ] AWS Inventory"
 
 inventory:
@@ -13,6 +15,31 @@ inventory:
   organization: "{{ organization }}"
   source: ec2
   region: us-east-1
+  source_vars:
+    keyed_groups:
+      - key: tags.role
+        separator: ''
+
+users:
+  - username: cloudadmin
+    password: cloudpass
+    first_name: Juan
+    last_name: Cirrus
+    email: cloudadmin@example.com
+    role: admin
+    target_team: "Cloud team"
+  - username: cloudop
+    password: cloudpass
+    first_name: Pedro
+    last_name: Stratus
+    email: cloudop@example.com
+    role: member
+    target_team: "Cloud team"
+
+teams: 
+  - name: "Cloud team"
+    description: "Cloud Team"
+    organization: "{{ organization }}"
 
 credentials:
   - name: "{{ creds_hosts_name }}" 
@@ -25,24 +52,28 @@ credentials:
     description: "Credentials for Cloud Provider"
     organization: "{{ organization }}"
     kind: aws 
-    username: "{{ aws_key }}"
-    password: "{{ aws_secret }}" 
+    username: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+    password: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}" 
 
 projects:
   - name: "[ {{ cliente }} ] Proyecto AWS"
     description: "Proyecto con playbooks para demo de {{ cliente }}"
+    organization: "{{ organization }}"
     scm_url: https://github.com/pseguel-redhat/rhel_nodejs_ansible
   - name: "[ {{ cliente }} ] Proyecto Operaciones" 
     description: "Proyecto con playbooks para demo de {{ cliente }}"
+    organization: "{{ organization }}"
     scm_url: https://github.com/pseguel-redhat/workshop-examples 
     scm_branch: webops
   - name: "[ {{ cliente }} ] Proyecto Developers"
     description: "Proyecto con playbooks para demo de {{ cliente }}"
+    organization: "{{ organization }}"
     scm_url: https://github.com/pseguel-redhat/workshop-examples 
     scm_branch: webdev
 
 playbooks:
   - name: "[ {{ cliente }} ] Deploy Linux Host"
+    workflow_name: "{{ workflow_name_basico }}"
     workflow_identifier: first
     inventory: Workshop Inventory
     project: "[ {{ cliente }} ] Proyecto AWS"
@@ -52,13 +83,47 @@ playbooks:
       - "{{ creds_cloud_name }}" 
   - name: "[ {{ cliente }} ] Web App Deploy"
     inventory: "{{ cloud_inventory }}"
+    workflow_name: "{{ workflow_name_basico }}"
     workflow_identifier: middle
     project: "[ {{ cliente }} ] Proyecto Operaciones"
     playbook: rhel/webops/web_infrastructure.yml
-    credentials: "{{ creds_cloud_name }}"
-  - name: "[ {{ cliente }} ] Node.js Deploy" 
+    credentials: "{{ creds_hosts_name }}"
+    become_enabled: yes
+  - name: "[ {{ cliente }} ] Node.js Deploy"
+    workflow_name: "{{ workflow_name_basico }}"
     workflow_identifier: end
     inventory: "{{ cloud_inventory }}"
     project: "[ {{ cliente }} ] Proyecto Developers"
     playbook: rhel/webdev/install_node_app.yml 
-    credentials: "{{ creds_cloud_name }}"
+    credentials: "{{ creds_hosts_name }}"
+    become_enabled: yes
+  - name: "[ {{ cliente }} ] Provisionar ambiente AWS"
+    workflow_name: "{{ workflow_name_avanzado }}"
+    workflow_identifier: first_avanzado
+    inventory: "{{ cloud_inventory }}"
+    project: "[ {{ cliente }} ] Proyecto AWS"
+    playbook: provision_environment.yml 
+    credentials: 
+      - "{{ creds_hosts_name }}"
+      - "{{ creds_cloud_name }}"
+    extra_vars:
+      dns_zone: "{{ dns_zone }}"
+  - name: "[ {{ cliente }} ] Configurar LB (HAProxy)"
+    workflow_name: "{{ workflow_name_avanzado }}"
+    workflow_identifier: conf_lb
+    inventory: "{{ cloud_inventory }}"
+    project: "[ {{ cliente }} ] Proyecto AWS"
+    playbook: configure_lb.yml 
+    credentials: "{{ creds_hosts_name }}"
+    limit: "lb"
+    become_enabled: yes
+  - name: "[ {{ cliente }} ] Configurar Backend Servers"
+    workflow_name: "{{ workflow_name_avanzado }}"
+    workflow_identifier: conf_backends
+    inventory: "{{ cloud_inventory }}"
+    project: "[ {{ cliente }} ] Proyecto AWS"
+    playbook: configure_webservers.yml 
+    credentials: "{{ creds_hosts_name }}"
+    limit: "webserver"
+    become_enabled: yes
+    

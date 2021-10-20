@@ -98,50 +98,91 @@
       extra_vars: "{{ item.extra_vars | default(omit) }}"
       state: present
     loop: "{{ playbooks }}"
+    tags: job_templates
 
-  - name: Add Workflow Job Templates
+  - name: Add Workflow Job Template Basico
     awx.awx.tower_workflow_job_template:
-      name: "{{ workflow_name }}"
+      name: "{{ workflow_name_basico }}"
       description: "Demo of Workflow Job Template"
       organization: "{{ organization }}"
+    tags: job_templates
+
+  - name: Add Workflow Job Template Avanzado
+    awx.awx.tower_workflow_job_template:
+      name: "{{ workflow_name_avanzado }}"
+      description: "Demo of Workflow Job Template"
+      organization: "{{ organization }}"
+    tags: job_templates
   
   - name: Create nodes
     awx.awx.tower_workflow_job_template_node:
       identifier: "{{ item.workflow_identifier }}"
-      workflow: "{{ workflow_name }}"
+      workflow: "{{ item.workflow_name }}"
       unified_job_template: "{{ item.name }}"
       organization: "{{ organization }}"
     loop: "{{ playbooks }}"
     when: item.workflow_identifier is defined
+    tags: job_templates
     
-  - name: Create Inventory Sync Node
+  - name: Create Inventory Sync Node Basico
     awx.awx.tower_workflow_job_template_node:
       identifier: Inventory sync
-      workflow: "{{ workflow_name }}"
+      workflow: "{{ workflow_name_basico }}"
       unified_job_template: "{{ inventory.name }}-source"
       organization: "{{ organization }}"
+    tags: job_templates
+
+  - name: Create Inventory Sync Node Avanzado
+    awx.awx.tower_workflow_job_template_node:
+      identifier: Inventory sync Adv
+      workflow: "{{ workflow_name_avanzado }}"
+      unified_job_template: "{{ inventory.name }}-source"
+      organization: "{{ organization }}"
+    tags: job_templates
 
   # Node assocation phase
-  - name: Associate nodes first, sync
+  - name: Workflow Basico - Associate nodes first, sync
     awx.awx.tower_workflow_job_template_node:
       identifier: first
-      workflow: "{{ workflow_name }}"
+      workflow: "{{ workflow_name_basico }}"
       organization: "{{ organization }}"
       success_nodes: 
         - Inventory sync
+    tags: job_templates
 
-  - name: Associate nodes sync, middle
+  - name: Workflow Basico - Associate nodes sync, middle
     awx.awx.tower_workflow_job_template_node:
       identifier: Inventory sync
-      workflow: "{{ workflow_name }}"
+      workflow: "{{ workflow_name_basico }}"
       organization: "{{ organization }}"
       success_nodes: 
         - middle
+    tags: job_templates
 
-  - name: Associate nodes middle, end
+  - name: Workflow Basico - Associate nodes middle, end
     awx.awx.tower_workflow_job_template_node:
       identifier: middle
-      workflow: "{{ workflow_name }}"
+      workflow: "{{ workflow_name_basico }}"
       organization: "{{ organization }}"
       success_nodes: 
         - end
+    tags: job_templates
+
+  - name: Workflow Avanzado - Associate nodes first, sync
+    awx.awx.tower_workflow_job_template_node:
+      identifier: first_avanzado
+      workflow: "{{ workflow_name_avanzado }}"
+      organization: "{{ organization }}"
+      success_nodes: 
+        - Inventory sync Adv
+    tags: job_templates
+
+  - name: Workflow Avanzado - Associate nodes sync, middle
+    awx.awx.tower_workflow_job_template_node:
+      identifier: Inventory sync Adv
+      workflow: "{{ workflow_name_avanzado }}"
+      organization: "{{ organization }}"
+      success_nodes: 
+        - conf_backends
+        - conf_lb
+    tags: job_templates
