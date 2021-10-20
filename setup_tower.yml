@@ -6,6 +6,38 @@
     - vars/secret.yml
 
   tasks:
+  - name: Create organization
+    awx.awx.tower_organization:
+      name: "{{ organization }}"
+      description: "{{ organization_desc }}"
+      state: present
+
+  - name: Add Cloud Org Teams
+    awx.awx.tower_team:
+      name: "{{ item.name }}"
+      description: "{{ item.description }}"
+      organization: "{{ item.organization }}"
+      state: present
+    loop: "{{ teams }}"
+
+  - name: Add Cloud Org Users
+    awx.awx.tower_user:
+      username: "{{ item.username }}"
+      password: "{{ item.password }}"
+      first_name: "{{ item.first_name }}"
+      last_name: "{{ item.last_name }}"
+      email: "{{ item.email }}"
+      state: present
+    loop: "{{ users }}"
+
+  - name: Configure Cloud users roles
+    awx.awx.tower_role:
+      user: "{{ item.username }}"
+      target_team: "{{ item.target_team }}"
+      role: "{{ item.role }}"
+      state: present
+    loop: "{{ users }}"
+
   - name: Create SSH keys
     openssh_keypair:
       path: "{{ priv_key_filename }}"
@@ -36,7 +68,7 @@
       description: "{{ inventory.description }} source"
       inventory: "{{ inventory.name }}"
       source: "{{ inventory.source }}"
-      source_regions: "{{ inventory.region }}"
+      #      source_regions: "{{ inventory.region }}"
       credential: "{{ creds_cloud_name }}"
       overwrite: true
       update_on_launch: True
@@ -61,6 +93,9 @@
       project: "{{ item.project }}"
       playbook: "{{ item.playbook }}"
       credentials: "{{ item.credentials }}"
+      become_enabled: "{{ item.become_enabled | default(omit) }}"
+      limit: "{{ item.limit | default(omit) }}"
+      extra_vars: "{{ item.extra_vars | default(omit) }}"
       state: present
     loop: "{{ playbooks }}"
 
@@ -77,6 +112,7 @@
       unified_job_template: "{{ item.name }}"
       organization: "{{ organization }}"
     loop: "{{ playbooks }}"
+    when: item.workflow_identifier is defined
     
   - name: Create Inventory Sync Node
     awx.awx.tower_workflow_job_template_node:
