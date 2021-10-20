@@ -1,0 +1,4 @@
+---
+dns_zone: rhscldemos.net
+ec2_name_prefix: DEMOCL
+ec2_region: us-east-1
