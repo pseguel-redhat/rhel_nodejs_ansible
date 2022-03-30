@@ -1,4 +1,4 @@
 ---
 collections:
-  -name: community.aws
+  - name: community.aws
   - name: amazon.aws
