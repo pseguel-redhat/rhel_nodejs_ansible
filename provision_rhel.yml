@@ -102,7 +102,9 @@
         region: "{{ ec2_region }}" 
         instance_type: t2.micro
         #centos 8.2 image
-        image: ami-01ca03df4a6012157
+        #image: ami-01ca03df4a6012157
+        # centos stream 8
+        image: ami-0ee70e88eed976a1b
         instance_tags:
           Info: "Provisionado por Ansible"
           Workshop: "{{ ec2_name_prefix }}"
