@@ -55,6 +55,26 @@
     loop: "{{ credentials }}"
     tags: credentials
 
+  - name: Add Automation Hub credentials
+    awx.awx.credential:
+      name: Automation Hub Credentials
+      description: "Automation Hub Credentials"
+      credential_type: "Ansible Galaxy/Automation Hub API Token"
+      organization: Default
+      inputs:
+        url: "{{ automation_hub_url }}"
+        auth_url: "{{ automation_hub_sso }}" 
+        token: "{{ automation_hub_token }}"  
+    tags: automationhub
+
+  - name: Add Automation Hub/Galaxy creds to Cloud org
+    awx.awx.organization:
+      name: Cloud
+      galaxy_credentials:
+        - "Automation Hub Credentials"
+        - "Ansible Galaxy"
+    tags: automationhub
+
   - name: Create Inventory for cloud hosts
     awx.awx.tower_inventory:
       name: "{{ inventory.name }}"
