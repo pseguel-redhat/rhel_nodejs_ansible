@@ -132,3 +132,7 @@
         delay: 60
         timeout: 320
       loop: "{{ node_output.instances }}"
+
+    - name: Show URL
+      debug:
+        msg: "http://{{ node_output.instances[0].public_ip }}"
