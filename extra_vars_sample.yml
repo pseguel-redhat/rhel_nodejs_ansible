@@ -2,3 +2,7 @@
 dns_zone: rhscldemos.net
 ec2_name_prefix: DEMOCL
 ec2_region: us-east-1
+cliente: DEMO
+automation_hub_token: YOUR_AUTOMATION_HUB_TOKEN
+automation_hub_url: https://console.redhat.com/api/automation-hub/
+automation_hub_sso: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
