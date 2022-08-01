@@ -122,7 +122,7 @@
 
     - name: Add new instance to host group
       add_host:
-        hostname: "{{ item.public_ip }}"
+        hostname: "{{ item.public_ip_address }}"
         groupname: launched
         ansible_user: centos
       loop: "{{ node_output.instances }}"
