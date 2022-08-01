@@ -128,14 +128,6 @@
         ansible_user: centos
       loop: "{{ node_output.instances }}"
 
-    - name: Wait for SSH to come up
-      delegate_to: "{{ item.public_ip_address }}"
-      remote_user: centos
-      wait_for_connection:
-        delay: 60
-        timeout: 320
-      loop: "{{ node_output.instances }}"
-
     - name: Show URL
       debug:
         msg: "http://{{ node_output.instances[0].public_ip_address }}"
