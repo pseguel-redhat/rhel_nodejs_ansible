@@ -1,7 +1,7 @@
 ---
 - name: Provision instance web1
   ec2_instance:
-    state: running
+    state: started
     key_name: "{{ ec2_name_prefix }}-key"
     network:
       assign_public_ip: true
@@ -27,7 +27,7 @@
 
 - name: Provision instance web2
   ec2_instance:
-    state: running
+    state: started
     key_name: "{{ ec2_name_prefix }}-key"
     network:
       assign_public_ip: true
@@ -53,7 +53,7 @@
 
 - name: Provision instance lb
   ec2_instance:
-    state: running
+    state: started
     key_name: "{{ ec2_name_prefix }}-key"
     network:
       assign_public_ip: true
@@ -106,10 +106,3 @@
     ansible_user: centos
   loop: "{{ dns_records }}"
 
-- name: Wait for SSH to come up 
-  delegate_to: "{{ item.public_ip }}"
-  remote_user: centos
-  wait_for_connection:
-    delay: 60
-    timeout: 320
-  loop: "{{ dns_records }}"
