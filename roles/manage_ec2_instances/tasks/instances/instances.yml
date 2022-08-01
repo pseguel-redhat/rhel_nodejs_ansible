@@ -9,7 +9,7 @@
     instance_type: t2.micro
     # centos stream 8
     image_id: ami-0ee70e88eed976a1b
-    instance_tags:
+    tags:
       Info: "Provisionado por Ansible"
       Workshop: "{{ ec2_name_prefix }}"
       Name: "{{ ec2_name_prefix }}-web1"
@@ -34,7 +34,7 @@
     instance_type: t2.micro
     # centos stream 8
     image_id: ami-0ee70e88eed976a1b
-    instance_tags:
+    tags:
       Info: "Provisionado por Ansible"
       Workshop: "{{ ec2_name_prefix }}"
       Name: "{{ ec2_name_prefix }}-web2"
@@ -59,7 +59,7 @@
     instance_type: t2.micro 
     # centos stream 8
     image_id: ami-0ee70e88eed976a1b
-    instance_tags:
+    tags:
       Info: "Provisionado por Ansible"
       Workshop: "{{ ec2_name_prefix }}"
       Name: "{{ ec2_name_prefix }}-lb"
