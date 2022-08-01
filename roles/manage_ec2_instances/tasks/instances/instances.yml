@@ -2,12 +2,13 @@
 - name: Provision instance web1
   ec2_instance:
     key_name: "{{ ec2_name_prefix }}-key"
-    assign_public_ip: true
-    group: "{{ ec2_security_group }}"
+    network:
+      iassign_public_ip: true
+    security_group: "{{ ec2_security_group }}"
     region: "{{ ec2_region }}" 
     instance_type: t2.micro
     # centos stream 8
-    image: ami-0ee70e88eed976a1b
+    image_id: ami-0ee70e88eed976a1b
     instance_tags:
       Info: "Provisionado por Ansible"
       Workshop: "{{ ec2_name_prefix }}"
@@ -16,21 +17,23 @@
     vpc_subnet_id: "{{ ec2_vpc_subnet_id }}"
     volumes:
     - device_name: /dev/sda1
-      volume_type: gp2
-      volume_size: 10 
-      delete_on_termination: true
+      ebs:
+        volume_type: gp2
+        volume_size: 10 
+        delete_on_termination: true
     wait: true
   register: node1_output
 
 - name: Provision instance web2
   ec2_instance:
     key_name: "{{ ec2_name_prefix }}-key"
-    assign_public_ip: true
-    group: "{{ ec2_security_group }}"
+    network:
+      assign_public_ip: true
+    security_group: "{{ ec2_security_group }}"
     region: "{{ ec2_region }}" 
     instance_type: t2.micro
     # centos stream 8
-    image: ami-0ee70e88eed976a1b
+    image_id: ami-0ee70e88eed976a1b
     instance_tags:
       Info: "Provisionado por Ansible"
       Workshop: "{{ ec2_name_prefix }}"
@@ -39,21 +42,23 @@
     vpc_subnet_id: "{{ ec2_vpc_subnet_id }}"
     volumes:
     - device_name: /dev/sda1
-      volume_type: gp2
-      volume_size: 10 
-      delete_on_termination: true
+      ebs:
+        volume_type: gp2
+        volume_size: 10 
+        delete_on_termination: true
     wait: true
   register: node2_output
 
 - name: Provision instance lb
   ec2_instance:
     key_name: "{{ ec2_name_prefix }}-key"
-    assign_public_ip: true
-    group: "{{ ec2_security_group }}"
+    network:
+      assign_public_ip: true
+    security_group: "{{ ec2_security_group }}"
     region: "{{ ec2_region }}" 
     instance_type: t2.micro 
     # centos stream 8
-    image: ami-0ee70e88eed976a1b
+    image_id: ami-0ee70e88eed976a1b
     instance_tags:
       Info: "Provisionado por Ansible"
       Workshop: "{{ ec2_name_prefix }}"
@@ -62,9 +67,10 @@
     vpc_subnet_id: "{{ ec2_vpc_subnet_id }}"
     volumes:
     - device_name: /dev/sda1
-      volume_type: gp2
-      volume_size: 10 
-      delete_on_termination: true
+      ebs:
+        volume_type: gp2
+        volume_size: 10 
+        delete_on_termination: true
     wait: true
   register: lb_node_output
 
@@ -72,11 +78,11 @@
   set_fact:
     dns_records:
     - dns_name: "lb-{{ ec2_name_prefix }}.{{ dns_zone }}"
-      public_ip: "{{ lb_node_output.instances[0].public_ip }}"
+      public_ip: "{{ lb_node_output.instances[0].public_ip_address }}"
     - dns_name: "web1-{{ ec2_name_prefix }}.{{ dns_zone }}"
-      public_ip: "{{ node1_output.instances[0].public_ip }}"
+      public_ip: "{{ node1_output.instances[0].public_ip_address }}"
     - dns_name: "web2-{{ ec2_name_prefix }}.{{ dns_zone }}"
-      public_ip: "{{ node2_output.instances[0].public_ip }}"
+      public_ip: "{{ node2_output.instances[0].public_ip_address }}"
 
 - name: Create DNS Records
   route53:
