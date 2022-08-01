@@ -1,6 +1,6 @@
 ---
 - name: Provision instance web1
-  ec2:
+  ec2_instance:
     key_name: "{{ ec2_name_prefix }}-key"
     assign_public_ip: true
     group: "{{ ec2_security_group }}"
@@ -23,7 +23,7 @@
   register: node1_output
 
 - name: Provision instance web2
-  ec2:
+  ec2_instance:
     key_name: "{{ ec2_name_prefix }}-key"
     assign_public_ip: true
     group: "{{ ec2_security_group }}"
@@ -46,7 +46,7 @@
   register: node2_output
 
 - name: Provision instance lb
-  ec2:
+  ec2_instance:
     key_name: "{{ ec2_name_prefix }}-key"
     assign_public_ip: true
     group: "{{ ec2_security_group }}"
