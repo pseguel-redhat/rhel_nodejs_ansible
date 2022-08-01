@@ -3,7 +3,7 @@
   ec2_instance:
     key_name: "{{ ec2_name_prefix }}-key"
     network:
-      iassign_public_ip: true
+      assign_public_ip: true
     security_group: "{{ ec2_security_group }}"
     region: "{{ ec2_region }}" 
     instance_type: t2.micro
