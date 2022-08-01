@@ -95,7 +95,7 @@
         ec2_vpc_subnet_id: "{{ create_subnet.subnet.id }}"
 
     - name: Provision instance
-      ec2:
+      ec2_instance:
         key_name: "{{ ec2_name_prefix }}-key"
         assign_public_ip: true
         group: "{{ ec2_security_group }}"
