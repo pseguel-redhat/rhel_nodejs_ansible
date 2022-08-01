@@ -1,6 +1,7 @@
 ---
 - name: Provision instance web1
   ec2_instance:
+    state: running
     key_name: "{{ ec2_name_prefix }}-key"
     network:
       assign_public_ip: true
@@ -26,6 +27,7 @@
 
 - name: Provision instance web2
   ec2_instance:
+    state: running
     key_name: "{{ ec2_name_prefix }}-key"
     network:
       assign_public_ip: true
@@ -51,6 +53,7 @@
 
 - name: Provision instance lb
   ec2_instance:
+    state: running
     key_name: "{{ ec2_name_prefix }}-key"
     network:
       assign_public_ip: true
@@ -73,7 +76,7 @@
         delete_on_termination: true
     wait: true
   register: lb_node_output
-
+  
 - name: Group DNS info from instances
   set_fact:
     dns_records:
