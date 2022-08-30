@@ -42,15 +42,12 @@
       path: "{{ priv_key_filename }}"
 
   - name: Add Credentials
-    awx.awx.tower_credential:
+    awx.awx.credential:
       name: "{{ item.name }}"
-      description: "Credentials for cloud based hosts"
-      kind: "{{ item.kind }}" 
+      description: "{{ item.description }}"
+      credential_type: "{{ item.credential_type }}" 
       organization: "{{ item.organization }}"
-      inputs:
-        username: "{{ item.username | default(omit) }}"
-        ssh_key_data: "{{ item.ssh_key_data | default(omit) }}"
-        password: "{{ item.password | default(omit) }}"
+      inputs: "{{ item.inputs }}"
       state: present
     loop: "{{ credentials }}"
     tags: credentials
