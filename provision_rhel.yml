@@ -60,7 +60,7 @@
       retries: 15
 
     - name: vpc internet gateway is present for {{ create_vpc.vpc.id }}
-      community.aws.ec2_vpc_igw:
+      amazon.aws.ec2_vpc_igw:
         region: "{{ ec2_region }}"
         vpc_id: "{{ create_vpc.vpc.id }}"
         tags:
