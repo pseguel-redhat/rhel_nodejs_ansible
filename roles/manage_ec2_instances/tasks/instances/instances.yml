@@ -22,8 +22,10 @@
         volume_type: gp2
         volume_size: 10 
         delete_on_termination: true
-    wait: true
+    wait: no
   register: node1_output
+  async: 1000
+  poll: 0  
 
 - name: Provision instance web2
   ec2_instance:
@@ -48,7 +50,7 @@
         volume_type: gp2
         volume_size: 10 
         delete_on_termination: true
-    wait: true
+    wait: no
   register: node2_output
 
 - name: Provision instance lb
@@ -74,9 +76,17 @@
         volume_type: gp2
         volume_size: 10 
         delete_on_termination: true
-    wait: true
+    wait: no
   register: lb_node_output
-  
+
+- name: Check async status
+  async_status: 
+    jid: "{{ node1_output.ansible_job_id }}"
+  register: node1_job_result
+  until: node1_job_result.finished
+  retries: 100
+  delay: 10
+
 - name: Group DNS info from instances
   set_fact:
     dns_records:
