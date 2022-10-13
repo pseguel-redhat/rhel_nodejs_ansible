@@ -102,7 +102,7 @@
 - name: Check async status lb
   async_status: 
     jid: "{{ lb_output.ansible_job_id }}"
-  register: node1_job_result
+  register: lb_job_result
   until: lb_job_result.instances[0].public_ip_address is defined
   retries: 100
   delay: 10
