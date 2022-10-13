@@ -79,11 +79,27 @@
     wait: no
   register: lb_node_output
 
-- name: Check async status
+- name: Check async status web1
   async_status: 
     jid: "{{ node1_output.ansible_job_id }}"
   register: node1_job_result
   until: node1_job_result.instances[0].public_ip_address is defined
+  retries: 100
+  delay: 10
+
+- name: Check async status web2
+  async_status: 
+    jid: "{{ node2_output.ansible_job_id }}"
+  register: node2_job_result
+  until: node2_job_result.instances[0].public_ip_address is defined
+  retries: 100
+  delay: 10
+
+- name: Check async status lb
+  async_status: 
+    jid: "{{ lb_output.ansible_job_id }}"
+  register: node1_job_result
+  until: lb_job_result.instances[0].public_ip_address is defined
   retries: 100
   delay: 10
 
