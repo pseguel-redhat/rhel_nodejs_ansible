@@ -22,7 +22,7 @@
         volume_type: gp2
         volume_size: 10 
         delete_on_termination: true
-    wait: no
+    wait: yes
   register: node1_output
   async: 1000
   poll: 0  
@@ -50,8 +50,10 @@
         volume_type: gp2
         volume_size: 10 
         delete_on_termination: true
-    wait: no
+    wait: yes
   register: node2_output
+  async: 1000
+  poll: 0  
 
 - name: Provision instance lb
   ec2_instance:
@@ -76,8 +78,10 @@
         volume_type: gp2
         volume_size: 10 
         delete_on_termination: true
-    wait: no
+    wait: yes
   register: lb_node_output
+  async: 1000
+  poll: 0  
 
 - name: Check async status web1
   async_status: 
