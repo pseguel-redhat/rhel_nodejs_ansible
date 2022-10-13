@@ -83,7 +83,7 @@
   async_status: 
     jid: "{{ node1_output.ansible_job_id }}"
   register: node1_job_result
-  until: node1_job_result.public_ip_address
+  until: node1_job_result.instances[0].public_ip_address
   retries: 100
   delay: 10
 
