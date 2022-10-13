@@ -2,6 +2,7 @@
 - name: Provision instance web1
   ec2_instance:
     state: started
+    name: "{{ ec2_name_prefix }}-web1"
     key_name: "{{ ec2_name_prefix }}-key"
     network:
       assign_public_ip: true
@@ -13,7 +14,6 @@
     tags:
       Info: "Provisionado por Ansible"
       Workshop: "{{ ec2_name_prefix }}"
-      Name: "{{ ec2_name_prefix }}-web1"
       role: webserver
     vpc_subnet_id: "{{ ec2_vpc_subnet_id }}"
     volumes:
@@ -28,6 +28,7 @@
 - name: Provision instance web2
   ec2_instance:
     state: started
+    name: "{{ ec2_name_prefix }}-web2"
     key_name: "{{ ec2_name_prefix }}-key"
     network:
       assign_public_ip: true
@@ -39,7 +40,6 @@
     tags:
       Info: "Provisionado por Ansible"
       Workshop: "{{ ec2_name_prefix }}"
-      Name: "{{ ec2_name_prefix }}-web2"
       role: webserver
     vpc_subnet_id: "{{ ec2_vpc_subnet_id }}"
     volumes:
@@ -54,6 +54,7 @@
 - name: Provision instance lb
   ec2_instance:
     state: started
+    name: "{{ ec2_name_prefix }}-lb"
     key_name: "{{ ec2_name_prefix }}-key"
     network:
       assign_public_ip: true
@@ -65,7 +66,6 @@
     tags:
       Info: "Provisionado por Ansible"
       Workshop: "{{ ec2_name_prefix }}"
-      Name: "{{ ec2_name_prefix }}-lb"
       role: lb
     vpc_subnet_id: "{{ ec2_vpc_subnet_id }}"
     volumes:
